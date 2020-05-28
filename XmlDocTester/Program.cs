@@ -1,121 +1,168 @@
 ﻿using System;
+using System.IO;
+using System.Text;
 using System.Xml;
+using System.Xml.Linq;
+using DataModelsLib;
 
 namespace XmlDocTester
 {
     class Program
     {
+        private readonly static string _visitorListXmlFilename = "Visitors.xml";        //Eg. @"C:\Data\Visitors.xml"
+
         static void Main(string[] args)
         {
-            //    XmlDocument xmlDoc = new XmlDocument();
-            //    XmlNode rootNode = xmlDoc.CreateElement("visitors");
-            //    xmlDoc.AppendChild(rootNode);
+            int choice;
 
-            //    XmlNode userNode = xmlDoc.CreateElement("visitor");
-            //    XmlAttribute attribute = xmlDoc.CreateAttribute("age");
-            //    attribute.Value = "42";
-            //    userNode.Attributes.Append(attribute);
-            //    userNode.InnerText = "John Doe";
-            //    rootNode.AppendChild(userNode);
+            Console.WriteLine("\n****  PROGRAM FOR XML FILE HANDLING IN C# ****\n");
 
-            //    userNode = xmlDoc.CreateElement("visitor");
-            //    attribute = xmlDoc.CreateAttribute("age");
-            //    attribute.Value = "39";
-            //    userNode.Attributes.Append(attribute);
-            //    userNode.InnerText = "Jane Doe";
-            //    rootNode.AppendChild(userNode);
-
-            //    xmlDoc.Save("C:\\Data\\test1.xml");
-
-
-            /*
-                    XmlDocument doc = new XmlDocument();
-                    doc.LoadXml("<book>" +
-                               "  <title>Oberon's Legacy</title>" +
-                               "  <price>5.95</price>" +
-                               "</book>"); 
-
-                   // Create a new element node.
-                   XmlNode newElem = doc.CreateNode("element", "pages", "");
-                    newElem.InnerText = "290";
-
-                   Console.WriteLine("Add the new element to the document...");
-                   XmlElement root = doc.DocumentElement;
-                    root.AppendChild(newElem);
-
-                   Console.WriteLine("Display the modified XML document...");
-                   Console.WriteLine(doc.OuterXml);
-
-                */
-
-
-
-
-            // Create the XmlDocument.
-            XmlDocument doc = new XmlDocument();
-            XmlNode rootNode = doc.CreateElement("Visitors");
-            doc.AppendChild(rootNode);
-            XmlNode userNode = doc.CreateElement("Visitor");
-            rootNode.AppendChild(userNode);
-
-            XmlNode id = doc.CreateElement("id");
-            id.InnerText = "1";
-            userNode.AppendChild(id);
-
-            XmlNode name = doc.CreateElement("name");
-            name.InnerText = "19.95";
-            userNode.AppendChild(name);
-
-            XmlNode date = doc.CreateElement("date");
-            date.InnerText = "19.95";
-            userNode.AppendChild(date);
-
-            XmlNode appartment = doc.CreateElement("appartment");
-            appartment.InnerText = "19.95";
-            userNode.AppendChild(appartment);
-
-            XmlNode phone = doc.CreateElement("phone");
-            phone.InnerText = "19.95";
-            userNode.AppendChild(phone);
-
-            XmlNode intime = doc.CreateElement("intime");
-            intime.InnerText = "19.95";
-            userNode.AppendChild(intime);
-
-
-            rootNode.AppendChild(userNode);
-
-            
-
-            //doc.LoadXml("<item><name>wrench</name></item>"); //Your string here
-
-            // Save the document to a file and auto-indent the output.
-            XmlTextWriter writer = new XmlTextWriter("data.xml", null);
-            writer.Formatting = Formatting.Indented;
-            doc.Save(writer);
-
-
-
-
-            using (XmlTextWriter writer1 = new XmlTextWriter("product.xml", System.Text.Encoding.UTF8))
+            do
             {
-                writer1.WriteStartDocument(true);
-                writer1.Formatting = Formatting.Indented;
-                writer1.WriteStartElement("Visitors");
-                CreateNode("1", "Srish", "12/02/23", "xyz", "770923832", "10", writer1);
-                CreateNode("2", "Mallika", "11/12/23", "abc", "98342143", "11", writer1);
-                CreateNode("3", "Arpita", "23/02/24", "def", "74563521131", "23", writer1);
-                CreateNode("4", "Devishi", "12/102/24", "ghi", "898653541", "12", writer1);
-                CreateNode("5", "Mona", "12/02/23", "jkl", "987564322", "09", writer1);
-                writer1.WriteEndElement();
-                writer1.WriteEndDocument();
-                writer1.Close();
-                Console.WriteLine("\n\nXML File created ! ");
-            }
+                Console.WriteLine("\n--------------- M E N U ---------------\n");
+                Console.WriteLine("Select option for XML File operation : ");
+                Console.WriteLine("1. Create/Write file using XmlWriter \n2. Create/Write file using XmlDocument\n3. Display XML file content\n4. Delete file\n5. Exit\n");
+                Console.Write("\nEnter your choice : ");
+                choice = Convert.ToInt32(Console.ReadLine());
 
+                switch (choice)
+                {
+                    case 1:
+                        CreateOrWriteXMLFIleUsingXmlTextWriter();
+                        break;
+
+                    case 2:
+                        CreateOrWriteXMLFIleUsingXmlDoc();
+                        break;
+
+                    case 3:
+                        XmlDocument doc = new XmlDocument();
+                        if (File.Exists(_visitorListXmlFilename))
+                        {
+                            doc.Load(_visitorListXmlFilename);
+                            string vistorsDoc = PrettyXml(doc.OuterXml);
+                            Console.WriteLine("\n"+ vistorsDoc + "\n");
+                        }
+                        else
+                        {
+                            Console.WriteLine("\nVisitors.xml file doesn't exist !! First create the file by choosing option 1 or 2.\n");
+                        }
+                        break;
+
+                    case 4:
+                        if (File.Exists(_visitorListXmlFilename))
+                        {
+                            File.Delete(_visitorListXmlFilename);
+                            Console.WriteLine("\nVisitors.xml file deleted successfully !!\n");
+                        }
+                        else
+                        {
+                            Console.WriteLine("\nVisitors.xml file doesn't exis t!!\n");
+                        }
+                        break;
+
+                    case 5:
+                        Console.WriteLine("\nExiting... \n");
+                        Environment.Exit(-1);
+                        break;
+
+                    default:
+                        Console.WriteLine("\nWrong Option !!  Select Again. \n");
+                        break;
+                }
+            } while (choice>0 || choice<4);
         }
 
-        public static void CreateNode(string ID, string Name, string Date, string Appartment, string Phone, string Intime, XmlTextWriter writer)
+
+        public static Visitor EnterVisitorDetails()
+        {
+            Console.WriteLine("\nEnter visitor details to add in XML file: ");
+            Console.Write("ID : ");
+            string ID = Console.ReadLine();
+            Console.Write("Name : ");
+            string Name = Console.ReadLine();
+            Console.Write("Date : ");
+            string Date = Console.ReadLine();
+            Console.Write("Appartment : ");
+            string Appartment = Console.ReadLine();
+            Console.Write("Phone : ");
+            string Phone = Console.ReadLine();
+            Console.Write("Intime : ");
+            string Intime = Console.ReadLine();
+
+            return new Visitor(ID, Name, Date, Appartment, Phone, Intime);
+        }
+               
+
+        public static void CreateOrWriteXMLFIleUsingXmlTextWriter()
+        {
+            if (!File.Exists(_visitorListXmlFilename))
+            {
+                using (XmlTextWriter writer1 = new XmlTextWriter(_visitorListXmlFilename, System.Text.Encoding.UTF8))
+                {
+                    writer1.WriteStartDocument(true);
+                    writer1.Formatting = Formatting.Indented;
+                    writer1.WriteStartElement("Visitors");
+                    //Visitor input from user
+                    Visitor newVisitor = EnterVisitorDetails();
+                    CreateVisitorNodeUsingWriter(newVisitor.ID, newVisitor.Name, newVisitor.Date, newVisitor.Appartment, newVisitor.Phone, newVisitor.InTime, writer1);
+                    writer1.WriteEndElement();
+                    writer1.WriteEndDocument();
+                    writer1.Close();
+                    Console.WriteLine("\nVisitors.xml file created and Visitor node added successfully !!\n");
+                }
+            }
+            else
+            {
+                CreateOrWriteXMLFIleUsingXmlDoc();
+            }          
+        }
+
+
+        public static void CreateOrWriteXMLFIleUsingXmlDoc()
+        {
+            XmlDocument doc = new XmlDocument();
+            doc.PreserveWhitespace = true;
+            try
+            {
+                /*      
+                    XmlDocument doc = new XmlDocument();
+                   doc.LoadXml("<book>" +
+                              "  <title>Oberon's Legacy</title>" +
+                              "  <price>5.95</price>" +
+                              "</book>"); 
+               */
+
+                doc.Load(_visitorListXmlFilename);
+                //FindVisitors node
+                XmlNode rootNode = doc.SelectSingleNode("Visitors");
+
+                //Visitor input from user
+                Visitor newVisitor = EnterVisitorDetails();
+                //Create child nodes
+                XmlNode userNode = CreateVisitorNodeUsingDoc(newVisitor.ID, newVisitor.Name, newVisitor.Date, newVisitor.Appartment, newVisitor.Phone, newVisitor.InTime, doc);
+                rootNode.AppendChild(userNode);
+                doc.Save(_visitorListXmlFilename);
+                Console.WriteLine("\nVisitor node added successfully !!\n");
+            }
+            catch (System.IO.FileNotFoundException)
+            {
+                XmlDeclaration xmlDeclaration = doc.CreateXmlDeclaration("1.0", "UTF-8", null);
+                XmlNode rootNode = doc.CreateElement("Visitors");
+                doc.AppendChild(rootNode);
+                doc.InsertBefore(xmlDeclaration, rootNode);
+
+                Visitor newVisitor = EnterVisitorDetails();
+                XmlNode userNode = CreateVisitorNodeUsingDoc(newVisitor.ID, newVisitor.Name, newVisitor.Date, newVisitor.Appartment, newVisitor.Phone, newVisitor.InTime, doc);
+                rootNode.AppendChild(userNode);
+
+                doc.Save(_visitorListXmlFilename);
+                Console.WriteLine("\nVisitors.xml file created and Visitor node added successfully !!\n");
+            }
+        }
+
+
+        public static void CreateVisitorNodeUsingWriter(string ID, string Name, string Date, string Appartment, string Phone, string Intime, XmlTextWriter writer)
         {
             writer.WriteStartElement("Visitor");
             writer.WriteStartElement("ID");
@@ -138,7 +185,82 @@ namespace XmlDocTester
             writer.WriteEndElement();
             writer.WriteEndElement();
         }
-    }
 
-    
+
+        public static XmlNode CreateVisitorNodeUsingDoc(string ID, string Name, string Date, string Appartment, string Phone, string Intime, XmlDocument doc)
+        {
+            // Create a new book element.
+            XmlNode visitorNode = doc.CreateElement("Visitor");
+
+            // Create and append a child element for the visitor node.
+            XmlNode idElement = doc.CreateElement("ID");
+            idElement.InnerText = ID;
+            visitorNode.AppendChild(idElement);
+
+            // Introduce a newline character so that XML is nicely formatted.
+            visitorNode.InnerXml = visitorNode.InnerXml.Replace(idElement.OuterXml, "\n    " + idElement.OuterXml + " \n    ");
+
+            // Create and append a child element for name of the visitor
+            XmlNode nameElement = doc.CreateElement("Name");
+            nameElement.InnerText = Name;
+            visitorNode.AppendChild(nameElement);
+
+            // Introduce a newline character so that XML is nicely formatted.
+            visitorNode.InnerXml = visitorNode.InnerXml.Replace(nameElement.OuterXml, nameElement.OuterXml + "   \n  ");
+
+            // Create and append a child element for visiting Date
+            XmlNode dateElement = doc.CreateElement("Date");
+            dateElement.InnerText = Date;
+            visitorNode.AppendChild(dateElement);
+
+            // Introduce a newline character so that XML is nicely formatted.
+            visitorNode.InnerXml = visitorNode.InnerXml.Replace(dateElement.OuterXml, dateElement.OuterXml + "   \n  ");
+
+            // Create and append a child element for visiting Appartment
+            XmlNode appartmentElement = doc.CreateElement("Appartment");
+            appartmentElement.InnerText = Appartment;
+            visitorNode.AppendChild(appartmentElement);
+
+            // Introduce a newline character so that XML is nicely formatted.
+            visitorNode.InnerXml = visitorNode.InnerXml.Replace(appartmentElement.OuterXml, appartmentElement.OuterXml + "   \n  ");
+
+            // Create and append a child element for visitor's phone no.
+            XmlNode phoneElement = doc.CreateElement("Phone");
+            phoneElement.InnerText = Phone;
+            visitorNode.AppendChild(phoneElement);
+
+            // Introduce a newline character so that XML is nicely formatted.
+            visitorNode.InnerXml = visitorNode.InnerXml.Replace(phoneElement.OuterXml, phoneElement.OuterXml + "   \n  ");
+
+            // Create and append a child element for visiting intime
+            XmlNode intimeElement = doc.CreateElement("Intime");
+            intimeElement.InnerText = Intime;
+            visitorNode.AppendChild(intimeElement);
+
+            // Introduce a newline character so that XML is nicely formatted.
+            visitorNode.InnerXml = visitorNode.InnerXml.Replace(intimeElement.OuterXml, intimeElement.OuterXml + "   \n  ");
+
+            return visitorNode;
+        }
+
+
+        public static string PrettyXml(string xml)
+        {
+            var stringBuilder = new StringBuilder();
+
+            var element = XElement.Parse(xml);
+
+            var settings = new XmlWriterSettings();
+            settings.OmitXmlDeclaration = true;
+            settings.Indent = true;
+            settings.NewLineOnAttributes = true;
+
+            using (var xmlWriter = XmlWriter.Create(stringBuilder, settings))
+            {
+                element.Save(xmlWriter);
+            }
+
+            return stringBuilder.ToString();
+        }
+    }    
 }
